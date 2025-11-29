@@ -1,0 +1,9 @@
+services:
+  syslog-ng:
+    build: .
+    container_name: syslog-ng
+    volumes:
+      - ./rate_limiter.py:/app/rate_limiter.py:ro
+      - ./rate_limit_test.conf:/etc/syslog-ng/conf.d/rate_limit_test.conf:ro
+      - ./logs:/var/log/  
+    restart: unless-stopped

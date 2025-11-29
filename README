@@ -1,0 +1,14 @@
+To build
+```bash
+docker compose up -d 
+```
+
+To enter container 
+```bash
+docker exec -it syslog-ng bash
+```
+
+To test rate limiting with 1200000 logs per second
+```bash
+loggen -i -S localhost 555 -r 1200000
+```

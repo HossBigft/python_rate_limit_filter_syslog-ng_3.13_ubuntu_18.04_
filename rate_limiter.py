@@ -19,4 +19,3 @@ with open(output_file_path, "a") as f_out:
             f_out.write(line)
             f_out.flush()
             lines_this_second += 1
-        # Excess lines are silently dropped
