@@ -1,6 +1,6 @@
-To build
+To start
 ```bash
-docker compose up -d 
+docker compose up --watch
 ```
 
 To enter container 
