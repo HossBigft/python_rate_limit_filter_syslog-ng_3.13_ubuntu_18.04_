@@ -1,6 +1,6 @@
 from ubuntu:18.04
 
-RUN apt-get update && apt-get install -y syslog-ng 
+RUN apt-get update && apt-get install -y syslog-ng  && apt install netcat -y
 
 COPY rate_limit_test.conf /etc/syslog-ng/conf.d/rate_limit_test.conf
 COPY rate_limiter.py /usr/local/bin/rate_limiter.py
