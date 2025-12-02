@@ -12,4 +12,4 @@ services:
           target: /etc/syslog-ng/conf.d/rate_limit_test.conf 
         - path: ./rate_limiter.py
           action: sync+restart
-          target: /usr/local/bin/rate_limiter.py
+          target: /etc/syslog-ng/python/rate_limiter.py

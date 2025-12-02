@@ -1,21 +1,27 @@
 #!/usr/bin/env python3
-import sys
 import time
 
-output_file_path = "/var/log/rate_limit_test"
-MAX_LINES_PER_SECOND = 10
-
-last_time = time.time()
-lines_this_second = 0
-
-with open(output_file_path, "a") as f_out:
-    for line in sys.stdin:
+class RateLimiter:
+    def __init__(self):
+        self.max_lines_per_second = 10
+        self.last_time = time.time()
+        self.lines_this_second = 0
+    
+    def init(self, options):
+        return True
+    
+    def deinit(self):
+        pass
+    
+    def parse(self, log_message):
         current_time = time.time()
-        if current_time - last_time >= 1:
-            last_time = current_time
-            lines_this_second = 0
-
-        if lines_this_second < MAX_LINES_PER_SECOND:
-            f_out.write(line)
-            f_out.flush()
-            lines_this_second += 1
+        
+        if current_time - self.last_time >= 1:
+            self.last_time = current_time
+            self.lines_this_second = 0
+        
+        if self.lines_this_second < self.max_lines_per_second:
+            self.lines_this_second += 1
+            return True  
+        
+        return False  
