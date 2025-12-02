@@ -2,6 +2,8 @@ services:
   syslog-ng:
     build: .
     container_name: syslog-ng
+    ports:
+     - 555:555
     volumes:
       - ./logs:/var/log/  
     restart: unless-stopped
