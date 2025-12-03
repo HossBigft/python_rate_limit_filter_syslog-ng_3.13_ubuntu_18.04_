@@ -6,6 +6,7 @@ services:
      - 555:555
     volumes:
       - ./logs:/var/log/  
+      - ./test_data:/test_data/ 
     restart: unless-stopped
     develop:
       watch:

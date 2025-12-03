@@ -1,14 +1,24 @@
 To start
-```bash
+```
 docker compose up --watch
 ```
 
 To enter container 
-```bash
+```
 docker exec -it syslog-ng bash
 ```
 
-To test rate limiting with 1200000 logs per second
-```bash
-loggen -i -S localhost 555 -r 1200000
+To test rate limiting with 1200000 logs per second contionuosly.
+```
+loggen -i -S localhost 555 -r 1200000 -d --file-read-file=test_data/apache_error.txt --file-loop-reading -T
+```
+
+To view stats
+```
+watch -d -n1 'cat logs/rate_limit_test| tr -s " "| cut -d" " -f5|sort |uniq -c |sort'
+```
+
+To send 1000 lines of apache error logs. Each newline counts as message, so 4000/4=1000.
+```
+loggen -i -S localhost 555  -d --file-read-file=test_data/apache_error.txt --file-loop-reading -n 4000
 ```
