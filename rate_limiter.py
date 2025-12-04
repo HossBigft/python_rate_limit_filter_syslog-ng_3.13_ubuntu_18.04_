@@ -45,7 +45,7 @@ class RateLimiter(object):
 
     def parse(self, log_message):
         site_domain = log_message["PROGRAM"]  # type: str
-        if site_domain not in self.domains.keys():
+        if site_domain not in self.domains:
             self.domains[site_domain] = TokenBucket(rate=self.max_lines_per_second)
         bucket = self.domains[site_domain]  # type: TokenBucket
         return bucket.consume(1)
