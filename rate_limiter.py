@@ -1,44 +1,52 @@
 #!/usr/bin/env python
 import time
 
-class DomainTracker:
-    def __init__(self):
-        self.counter = 0  # type: int
-        self.first_sighting = time.time()  # type: float
+class TokenBucket:
+    def __init__(self, rate=10000):
+        self.rate = rate   # type: int
+        self.tokens = 0.0  # type: float
+        self.last_sighting = time.time()  # type: float
+           
+    def refill_tokens(self):
+        now = time.time()
+        elapsed = now - self.last_sighting  
+        
+        if elapsed >= 1:  
+            num_refills = int(elapsed)  
+            tokens_to_add = num_refills * self.rate  
+        
+            self.tokens += tokens_to_add
+            self.tokens = min(self.rate, self.tokens)
+            
+            self.last_sighting = now
+    
+    
+    def has_tokens(self, amount):
+        return amount <= self.tokens
 
-    def increment(self):
-        self.counter += 1
+    def consume(self, amount):
+        self.refill_tokens()
+        if self.has_tokens(amount):
+            self.tokens -= amount
+            return True
 
-    def reset(self):
-        self.counter = 0
-        self.first_sighting = time.time()
+        return False
 
 
 class RateLimiter(object):
     def __init__(self):
         self.max_lines_per_second = 10
-        self.domains = {}  # type: dict[str, DomainTracker]
-
+        self.domains = {}  # type: dict[str, TokenBucket]
     def init(self, options):
         if "max_logs_per_second" in options:
             self.max_lines_per_second = int(options["max_logs_per_second"])
         return True
 
-    def deinit(self):
-        pass
 
     def parse(self, log_message):
-        current_time = time.time()  # type: float
         site_domain = log_message["PROGRAM"]  # type: str
-
         if site_domain not in self.domains.keys():
-            self.domains[site_domain] = DomainTracker()
-
-        tracker = self.domains[site_domain]
-
-        if current_time - tracker.first_sighting >= 1:
-            tracker.reset()
-
-        tracker.increment()
-
-        return tracker.counter <= self.max_lines_per_second
+            self.domains[site_domain] = TokenBucket(rate=self.max_lines_per_second)
+        bucket = self.domains[site_domain]  # type: TokenBucket
+        return bucket.consume(1)
+    
