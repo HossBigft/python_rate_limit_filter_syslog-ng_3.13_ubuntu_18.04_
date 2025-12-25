@@ -3,7 +3,7 @@ import time
 
 class TokenBucket:
     __slots__ = ('rate', 'tokens', 'last_sighting', 'last_overflow')
-    def __init__(self, last_sighting, rate=10000):
+    def __init__(self, last_sighting, rate=10):
         self.rate = rate   # type: int
         self.tokens = rate   # type: float
         self.last_sighting =  last_sighting # type: float
