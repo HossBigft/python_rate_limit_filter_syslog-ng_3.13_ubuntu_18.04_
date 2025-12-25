@@ -2,19 +2,19 @@
 import time
 
 class TokenBucket:
-    __slots__ = ('rate', 'tokens', 'last_sighting')
+    __slots__ = ('rate', 'tokens', 'last_sighting', 'last_overflow')
     def __init__(self, last_sighting, rate=10000):
         self.rate = rate   # type: int
         self.tokens = 0.0  # type: float
-        self.last_sighting =  last_sighting# type: float
-           
+        self.last_sighting =  last_sighting # type: float
+        self.last_overflow =  0.0 # type: float  
 
 
 class RateLimiter(object):
     __slots__ = ('max_lines_per_second', 'domains', 'last_cleanup')
     
     def __init__(self):
-        self.max_lines_per_second = 10
+        self.max_lines_per_second = 10 # type: int
         self.domains = {}  # type: dict[str, TokenBucket]
         self.last_cleanup = time.time() # type: float
         
@@ -30,15 +30,17 @@ class RateLimiter(object):
         ]
         for domain in domains_to_remove:
             del self.domains[domain]
+            
     def parse(self, log_message):
         CLEANUP_PERIOD_S = 300 # type: int 
-        now = time.time()
+        OVERFLOW_WARNING_PERIOD_S = 2 # type: int 
+        now = time.time() # type: float
 
         site_domain = log_message["PROGRAM"]  # type: str
         if site_domain not in self.domains:
             self.domains[site_domain] = TokenBucket(rate=self.max_lines_per_second, last_sighting=now)
         bucket = self.domains[site_domain]  # type: TokenBucket
-        elapsed = now - bucket.last_sighting
+        elapsed = now - bucket.last_sighting # type: float
         
         if elapsed >= 1.0:
             bucket.tokens = min(bucket.rate, bucket.tokens + int(elapsed) * bucket.rate)
@@ -48,6 +50,10 @@ class RateLimiter(object):
                 self.last_cleanup = now
         if bucket.tokens >= 1.0:
             bucket.tokens -= 1.0
+            return True
+        elif now - bucket.last_overflow >= OVERFLOW_WARNING_PERIOD_S:   
+            bucket.last_overflow = now  
+            log_message["MESSAGE"] ="[WARNING] " + site_domain + " has exceeded the rate limit of " + str(self.max_lines_per_second) + " messages per second."
             return True
         
         return False
